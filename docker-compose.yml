@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: dexa-postgres
+    environment:
+      POSTGRES_USER: dexa_user
+      POSTGRES_PASSWORD: dexa_password
+      POSTGRES_DB: dexa_attendance_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./init-multiple-dbs.sh:/docker-entrypoint-initdb.d/init-multiple-dbs.sh
+    networks:
+      - dexa-network
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: dexa-rabbitmq
+    ports:
+      - "5672:5672"   # AMQP
+      - "15672:15672" # Management Dashboard
+    environment:
+      RABBITMQ_DEFAULT_USER: guest
+      RABBITMQ_DEFAULT_PASS: guest
+    networks:
+      - dexa-network
+
+  main-api:
+    build:
+      context: ./main-api
+      dockerfile: Dockerfile
+    container_name: dexa-main-api
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: dexa_user
+      DB_PASSWORD: dexa_password
+      DB_NAME: dexa_attendance_db
+      JWT_SECRET: super_secret_dexa_key_2026
+      JWT_EXPIRES_IN: 1d
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      RABBITMQ_QUEUE: audit_log_queue
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - dexa-network
+
+  logging-service:
+    build:
+      context: ./logging-service
+      dockerfile: Dockerfile
+    container_name: dexa-logging-service
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_USER: dexa_user
+      DB_PASSWORD: dexa_password
+      LOG_DB_NAME: dexa_audit_log_db
+      RABBITMQ_URL: amqp://rabbitmq:5672
+      RABBITMQ_QUEUE: audit_log_queue
+    depends_on:
+      - postgres
+      - rabbitmq
+    networks:
+      - dexa-network
+
+volumes:
+  postgres_data:
+
+networks:
+  dexa-network:
+    driver: bridge

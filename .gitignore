@@ -1,0 +1,48 @@
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Compiled outputs
+dist/
+**/dist/
+build/
+**/build/
+.next/
+out/
+
+# TypeScript cache
+*.tsbuildinfo
+**/*.tsbuildinfo
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment files
+.env
+.env*.local
+!.env.example
+**/.env
+**/.env*.local
+!**/.env.example
+
+# Docker & Database Volumes
+postgres_data/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE & Editor files
+.idea/
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
