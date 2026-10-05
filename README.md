@@ -7,20 +7,20 @@ Sistem manajemen presensi karyawan dan administrasi HRD berbasis arsitektur *mic
 ## 🏛️ Arsitektur Sistem
 
 ```mermaid
-graph TD
+flowchart TD
     Client["Frontend Web App (React + Vite)<br/>Port: 5173"]
     MainAPI["Main API (NestJS)<br/>Port: 3000"]
-    RabbitMQ["RabbitMQ Broker<br/>Port: 5672 / 15672"]
-    LoggingSvc["Logging Service (NestJS Microservice)<br/>Port: 3001"]
-    PostgresAtt[("PostgreSQL: dexa_attendance_db<br/>(Users & Attendance)")]
-    PostgresAudit[("PostgreSQL: dexa_audit_log_db<br/>(Profile Change Logs)")]
+    RabbitMQ["RabbitMQ Message Broker<br/>Port: 5672 / 15672"]
+    LoggingSvc["Logging Service Microservice<br/>Port: 3001"]
+    PostgresAtt[("PostgreSQL: dexa_attendance_db<br/>Users and Attendance Records")]
+    PostgresAudit[("PostgreSQL: dexa_audit_log_db<br/>Profile Audit Change Logs")]
 
-    Client -->|REST API (Auth, Attendance, User CRUD)| MainAPI
-    Client <-->|WebSocket Real-time Alerts (Socket.io)| MainAPI
-    MainAPI -->|TypeORM| PostgresAtt
-    MainAPI -->|Emit 'profile_updated' Event| RabbitMQ
-    RabbitMQ -->|Consume 'audit_log_queue'| LoggingSvc
-    LoggingSvc -->|Save Old & New Data Diff| PostgresAudit
+    Client -->|"REST API (Auth, Attendance, User CRUD)"| MainAPI
+    MainAPI -->|"Socket.io Real-time Push Notification"| Client
+    MainAPI -->|"TypeORM Queries"| PostgresAtt
+    MainAPI -->|"Emit 'profile_updated' Event"| RabbitMQ
+    RabbitMQ -->|"Consume 'audit_log_queue'"| LoggingSvc
+    LoggingSvc -->|"Store Old and New Data Diff"| PostgresAudit
 ```
 
 ---
