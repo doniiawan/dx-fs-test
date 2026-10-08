@@ -4,9 +4,12 @@ import { defineConfig } from "vite"
 
 export default defineConfig({
   plugins: [react()],
+  server: {
+    host: true, // Listen on all network addresses (0.0.0.0) so devices on the same Wi-Fi can access
+  },
   resolve: {
     alias: {
-      "@": path.resolve(__dirname, "./src"),
+      "@": path.resolve(import.meta.dirname || __dirname, "./src"),
     },
   },
 })

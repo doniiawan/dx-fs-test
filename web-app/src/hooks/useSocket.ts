@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import io, { Socket } from 'socket.io-client';
+import { getApiBaseUrl } from '../lib/api';
 
 let socket: Socket;
 
@@ -8,7 +9,7 @@ export const useAdminSocketNotification = (onNotification: (data: any) => void, 
     if (!enabled) return;
 
     // Connect ke Socket.io server NestJS
-    socket = io('http://localhost:3000');
+    socket = io(getApiBaseUrl());
 
     socket.on('connect', () => {
       console.log('Connected to WebSocket server');
