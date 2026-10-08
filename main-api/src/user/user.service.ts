@@ -49,6 +49,9 @@ export class UserService {
       photoUrl: updatedUser.photoUrl,
     };
 
+    console.log('old data', oldData)
+    console.log('new data', newData)
+
     // 1. Message Queue to Logging Service (RabbitMQ)
     this.auditLogClient.emit('profile_updated', {
       userId: updatedUser.id,
