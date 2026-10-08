@@ -18,6 +18,14 @@ export class UserService {
     private readonly notificationGateway: NotificationGateway,
   ) { }
 
+  //get user detail
+  async getProfile(userId: string) {
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) throw new NotFoundException('User not found');
+    const { password, ...result } = user;
+    return result;
+  }
+
   // Update Profile Karyawan (Self)
   async updateProfile(userId: string, dto: UpdateProfileDto) {
     const user = await this.userRepository.findOne({ where: { id: userId } });

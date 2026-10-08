@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { api } from '@/lib/api';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -28,18 +28,44 @@ export const ProfilePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
 
+  // Sync state ketika user dari AuthContext berubah / selesai loaded
+  useEffect(() => {
+    if (user) {
+      setPhoneNumber(user.phoneNumber || '');
+      setPhotoUrl(user.photoUrl || '');
+    }
+  }, [user]);
+
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get('/user/profile');
+      if (res.data) {
+        setPhoneNumber(res.data.phoneNumber || '');
+        setPhotoUrl(res.data.photoUrl || '');
+      }
+    } catch (err) {
+      console.error('Gagal mengambil data profil:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
   const handleUpdate = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
 
     try {
-      const payload: any = {
+      const payload: Record<string, any> = {
         phoneNumber,
         photoUrl,
       };
-      if (password && password.trim().length >= 6) {
-        payload.password = password.trim();
+
+      const cleanPassword = password.trim();
+      if (cleanPassword && cleanPassword.length >= 6) {
+        payload.password = cleanPassword;
       }
 
       const res = await api.put('/user/profile', payload);
@@ -121,11 +147,10 @@ export const ProfilePage: React.FC = () => {
 
         {message && (
           <div
-            className={`p-4 rounded-2xl mb-6 text-xs font-medium border flex items-start space-x-3 animate-in fade-in ${
-              message.type === 'success'
-                ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
-                : 'bg-red-500/10 text-red-300 border-red-500/20'
-            }`}
+            className={`p-4 rounded-2xl mb-6 text-xs font-medium border flex items-start space-x-3 animate-in fade-in ${message.type === 'success'
+              ? 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20'
+              : 'bg-red-500/10 text-red-300 border-red-500/20'
+              }`}
           >
             {message.type === 'success' ? (
               <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />

@@ -15,6 +15,12 @@ import { Role } from '../entities/user.entity';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
+  @ApiOperation({ summary: 'Employee: Get self profile' })
+  @Get('profile')
+  getProfile(@Request() req: any) {
+    return this.userService.getProfile(req.user.id);
+  }
+
   @ApiOperation({ summary: 'Employee: Update self profile (triggers RabbitMQ & WebSocket)' })
   @Put('profile')
   updateProfile(@Request() req: any, @Body() dto: UpdateProfileDto) {
